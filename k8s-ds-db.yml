@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-db-deployment
+  labels:
+    app: demo-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-db
+  template:
+    metadata:
+      labels:
+        app: demo-db
+    spec:
+      containers:
+      - name: demo-db
+        image: mysql
+        ports:
+        - containerPort: 3306
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: "yes"
+          - name: MYSQL_DATABASE
+            value: test-db
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-db-service
+spec:
+  selector:
+    app: demo-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

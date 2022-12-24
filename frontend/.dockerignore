@@ -1,0 +1,7 @@
+node_modules
+__pychache__
+.vscode
+*.pyc
+*.log
+cache
+env

@@ -1,0 +1,113 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: 10
+
+default:
+  tags:
+    - docker
+
+stages:
+  - test
+  - build
+  - deploy
+
+# TEST STAGE
+test_frontend:
+  stage: test
+  image: node:14-bullseye
+  script:
+    - npm install
+    - npm run test-ci
+  cache:
+    paths:
+      - node_modules/
+  rules:
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+      when: never
+
+# kaniko build tmplate
+.build_template:
+  stage: build
+  interruptible: true
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  variables:
+    #More Information on Kaniko Caching: https://cloud.google.com/build/docs/kaniko-cache\n\t#Set to 2 weeks
+    KANIKO_CACHE_ARGS: "--cache=true --cache-copy-layers=true --cache-ttl=336h"
+    DOCKERFILE: $CI_PROJECT_DIR/Dockerfile
+    VARIANT: $DOCKER_IMAGE_NODE
+    CONTEXT: $CI_PROJECT_DIR
+    COMMIT_TAG: "none"
+  script:
+    - echo 'Docker image variant $VARIANT'
+    - mkdir -p /kaniko/.docker
+    - export docker_auth=$(echo -n $DOCKER_USERNAME:$DOCKER_PASSWORD | base64)
+    - export gitlab_auth=$(echo -n $CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD | base64)
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"${docker_auth}\"},\"${CI_REGISTRY}\":{\"auth\":\"${gitlab_auth}\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CONTEXT --dockerfile $DOCKERFILE --build-arg BUILD_ENV=$BUILD_ENV --build-arg COMMIT_HASH=$CI_COMMIT_SHORT_SHA --build-arg NODE_VARIANT=$VARIANT --build-arg COMMIT_TAG=$COMMIT_TAG --registry-mirror mirror.gcr.io --destination $BUILD_IMAGE_TAG
+
+.build_webapp:
+  extends: .build_template
+  variables:
+    BUILD_IMAGE_TAG: $CI_REGISTRY_IMAGE:${CI_COMMIT_BRANCH}-${BUILD_ENV}
+  before_script:
+    # Replace BUILD_IMAGE_TAG with COMMIT_TAG if Tag was used
+    - if [[ $CI_COMMIT_TAG ]]; then export BUILD_IMAGE_TAG=$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$BUILD_ENV; fi
+    - if [[ $CI_COMMIT_TAG && $BUILD_ENV == "production" ]]; then export BUILD_IMAGE_TAG=$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG; fi
+  rules:
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+build_production_wabapp:
+  extends: .build_webapp
+  variables:
+    BUILD_ENV: production
+
+################### Deploy ##################
+
+# container deploy tmplate
+.deploy_template:
+  stage: deploy
+  interruptible: true
+  image:
+    name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine
+    entrypoint: [""]
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    # Replace IMAGE_TAG with COMMIT_TAG if Tag was used
+    - if [ $CI_COMMIT_TAG ]; then export IMAGE_TAG=$CI_COMMIT_TAG; fi
+    - if [ $BUILD_ENV ]; then export IMAGE_TAG=$CI_COMMIT_BRANCH-$BUILD_ENV; fi
+    - if [ $CI_COMMIT_TAG ] && [ $BUILD_ENV ]; then export IMAGE_TAG=$CI_COMMIT_TAG-$BUILD_ENV; fi
+    - if [ $CI_COMMIT_TAG ] && [ $BUILD_ENV = "production" ]; then export IMAGE_TAG=$CI_COMMIT_TAG; fi
+    - echo "Deploying ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}"
+    - apk add rsync coreutils openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod -R 700 ~/.ssh
+    - ssh-keyscan -t rsa -H $SSH_HOST >> ~/.ssh/known_hosts
+    - echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
+  script:
+    - ssh root@$SSH_HOST "docker ps"
+    - ssh root@$SSH_HOST "docker pull ${CI_REGISTRY_IMAGE}:${IMAGE_TAG}-production"
+    - ssh root@$SSH_HOST "docker stack deploy --with-registry-auth --resolve-image always -c /srv/demo-stack.yml demo"
+    - sleep 10
+    - ssh root@$SSH_HOST "docker service ls"
+    - ssh root@$SSH_HOST "docker service inspect --pretty demo_frontend"
+
+deploy_app:
+  extends: .deploy_template
+  variables:
+    # On COMMIT_TAG this gets replaced by the tag
+    IMAGE_TAG: $CI_COMMIT_BRANCH
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != "master"
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: manual
+
+

@@ -1,0 +1,68 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: "traefik:v2.6"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - --providers.docker.swarmmode
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
+
+  backend:
+    image: demo-backend
+    restart: unless-stopped
+    build: backend
+    environment:
+      - NODE_HOST=$HOSTNAME
+      - DB_HOST=db
+    depends_on:
+      - db
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+        - "traefik.http.routers.backend.entrypoints=web"
+        - "traefik.http.services.backend.loadbalancer.server.port=5000"
+
+  frontend:
+    image: demo-frontend
+    restart: unless-stopped
+    build: frontend
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.frontend.rule=Host(`frontend.localhost`)"
+        - "traefik.http.routers.frontend.entrypoints=web"
+        - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+
+####### Database services #######
+  db:
+    image: mysql
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+      - MYSQL_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=test-db
+    volumes:
+      - db_sql_data:/var/lib/mysql
+
+volumes:
+  db_sql_data:
