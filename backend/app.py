@@ -4,32 +4,37 @@ import dotenv
 import logging
 import os
 import sys
-from flask import Flask
+from flask import Flask, Response
 from datetime import date
 from flask_cors import CORS
 from sqlalchemy import update
 from flask_limiter.util import get_remote_address
-import lib.db as db
+from prometheus_flask_exporter.multiprocess  import PrometheusMetrics
+# import lib.db as db
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 conn = None
 
 # Flask setup
 logging.info('Init Flask')
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 cors = CORS(app)
+
+metrics.info('app_info', 'Application info', version='0.1.1')
 
 
 @app.route('/')
 def home_get():
-    res = dict(app.dbconn.execute(
-        'SELECT type, counter FROM access;').fetchall())
-    stmt = (
-        update(db.accessTable).
-        where(db.accessTable.c.type == 'GET').
-        values(counter=res['GET'] + 1)
-    )
-    logging.info('Got GET reqest at: ' + str(date.today()))
-    app.dbconn.execute(stmt)
+
+    # res = dict(app.dbconn.execute(
+    #     'SELECT type, counter FROM access;').fetchall())
+    # stmt = (
+    #     update(db.accessTable).
+    #     where(db.accessTable.c.type == 'GET').
+    #     values(counter=res['GET'] + 1)
+    # )
+    # logging.info('Got GET reqest at: ' + str(date.today()))
+    # app.dbconn.execute(stmt)
     return {'RequestInfo':
             {
                 'host': flask.request.headers.get('Host'),
@@ -38,22 +43,28 @@ def home_get():
             },
             'ServerInfo': {
                 'Node': os.environ.get('NODE_HOST', 'DEFAULT_HOST'),
-                'RequestCounter': res['GET']
+                'RequestCounter': 0
             }
             }
 
+@app.route('/metrics')
+@metrics.do_not_track()
+def metrics_get():
+    response_data, content_type = metrics.generate_metrics()
+    print(response_data)
+    return  Response(response_data, mimetype=content_type)
 
 @app.route("/", methods=["POST"])
 def home_post():
     logging.info('Got POST reqest at: ' + str(date.today()))
-    res = dict(app.dbconn.execute(
-        'SELECT type, counter FROM access;').fetchall())
-    stmt = (
-        update(db.accessTable).
-        where(db.accessTable.c.type == 'POST').
-        values(counter=res['POST'] + 1)
-    )
-    app.dbconn.execute(stmt)
+    # res = dict(app.dbconn.execute(
+    #     'SELECT type, counter FROM access;').fetchall())
+    # stmt = (
+    #     update(db.accessTable).
+    #     where(db.accessTable.c.type == 'POST').
+    #     values(counter=res['POST'] + 1)
+    # )
+    # app.dbconn.execute(stmt)
     return {'RequestInfo':
             {
                 'host': flask.request.headers.get('Host'),
@@ -80,7 +91,7 @@ def start():
         logging.debug('Using .env file')
 
     # DB Setup
-    app.dbconn = db.initDB()
+    # app.dbconn = db.initDB()
     return app
 
 
