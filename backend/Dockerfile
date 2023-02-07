@@ -10,5 +10,6 @@ RUN apk add gcc musl-dev libffi libffi-dev \
 COPY . /app
 ARG APP_PORT=5000
 ENV PORT=${APP_PORT}
+ENV PROMETHEUS_MULTIPROC_DIR=/tmp
 
-ENTRYPOINT [ "gunicorn", "-w 2", "app:app" ]
+ENTRYPOINT [ "gunicorn", "-c", "gunicorn.py", "app:app" ]

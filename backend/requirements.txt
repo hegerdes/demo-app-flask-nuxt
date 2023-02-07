@@ -17,3 +17,5 @@ six
 SQLAlchemy
 urllib3
 Werkzeug
+Flask-Limiter
+prometheus-flask-exporter
