@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: hegerdes/demo-app-flask-nuxt
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: backend
 
 imagePullSecrets: []
 nameOverride: ""
@@ -23,7 +23,7 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-# podAnnotations: {}
+podAnnotations: {}
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -39,6 +39,13 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 80
+  annotations: {}
+  prometheus:
+    enabled: true
+    scheme: http
+    path: /metrics
+    port: 80
+
 
 ingress:
   enabled: false

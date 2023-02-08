@@ -43,14 +43,29 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Common labels
+Pod annotations
 */}}
-{{- define "flask-backend.annotations" -}}
+{{- define "flask-backend.pod.annotations" -}}
 {{- range $k, $v := .Values.podAnnotations }}
 {{- $k }}: {{ $v }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 checksum: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+{{- end }}
+
+{{/*
+Service annotations
+*/}}
+{{- define "flask-backend.service.annotations" -}}
+prometheus/scrape: {{ .Values.service.prometheus.enabled | quote }}
+{{- range $k, $v := .Values.service.annotations }}
+{{- $k }}: {{ $v }}
+{{- end }}
+{{- if .Values.service.prometheus.enabled }}
+prometheus/scheme: {{ .Values.service.prometheus.scheme | quote}}
+prometheus/path: {{ .Values.service.prometheus.path | quote}}
+prometheus/port: {{ .Values.service.prometheus.port | quote}}
+{{- end }}
 {{- end }}
 
 {{/*
