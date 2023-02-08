@@ -21,7 +21,8 @@ metrics = PrometheusMetrics(app)
 cors = CORS(app)
 
 metrics.info('app_info', 'Application info', version='0.1.1')
-
+get_counter = 0
+post_counter = 0
 
 @app.route('/')
 def home_get():
@@ -42,8 +43,8 @@ def home_get():
                 'method': 'GET'
             },
             'ServerInfo': {
-                'Node': os.environ.get('NODE_HOST', 'DEFAULT_HOST'),
-                'RequestCounter': 0
+                'Node': os.environ.get('HOSTNAME', 'DEFAULT_HOST'),
+                'RequestCounter': get_counter
             }
             }
 
@@ -73,8 +74,8 @@ def home_post():
                 'payload': str(flask.request.get_json())
             },
             'ServerInfo': {
-                'Node': os.environ.get('NODE_HOST', 'DEFAULT_HOST'),
-                'RequestCounter': res['POST']
+                'Node': os.environ.get('HOSTNAME', 'DEFAULT_HOST'),
+                'RequestCounter': post_counter
             }
             }
 
