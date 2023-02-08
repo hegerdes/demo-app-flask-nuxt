@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   traefik:
-    image: "traefik:v2.6"
+    image: "traefik:v2.8"
     command:
       - "--log.level=DEBUG"
       - "--api.insecure=true"
@@ -28,8 +28,6 @@ services:
     environment:
       - NODE_HOST=$HOSTNAME
       - DB_HOST=db
-    depends_on:
-      - db
     deploy:
       mode: replicated
       replicas: 2
