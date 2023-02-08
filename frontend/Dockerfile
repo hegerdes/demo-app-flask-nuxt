@@ -1,11 +1,12 @@
 # BUILD-STAGE
 ARG NODE_VARIANT="16-alpine"
-FROM node:$NODE_VARIANT
+FROM node:$NODE_VARIANT as build
 ARG BUILD_ENV=production
+# ENV NODE_OPTIONS=--openssl-legacy-provider # needed for old webpacke and node v18+
 
 WORKDIR /app
-COPY package.json /app
-RUN npm install
+COPY package.json package-lock.json /app/
+RUN npm ci
 
 COPY . /app
 RUN cp .env.$BUILD_ENV .env && npm run generate && cat .env
@@ -19,6 +20,6 @@ ENV COMMIT_TAG=$COMMIT_TAG
 LABEL commit-hash=$COMMIT_HASH
 LABEL commit-tag=$COMMIT_TAG
 
-COPY --from=0 /app/dist /usr/local/apache2/htdocs
+COPY --from=build /app/dist /usr/local/apache2/htdocs
 
 ENTRYPOINT ["httpd", "-D", "FOREGROUND"]
