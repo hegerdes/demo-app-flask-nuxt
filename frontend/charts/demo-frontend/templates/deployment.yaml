@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "flask-frontend.fullname" . }}
+  name: {{ include "demo-frontend.fullname" . }}
   labels:
-    {{- include "flask-frontend.labels" . | nindent 4 }}
+    {{- include "demo-frontend.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "flask-frontend.selectorLabels" . | nindent 6 }}
+      {{- include "demo-frontend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
-        {{- include "flask-frontend.pod.annotations" . | nindent 8 }}
+        {{- include "demo-frontend.pod.annotations" . | nindent 8 }}
       labels:
-        {{- include "flask-frontend.selectorLabels" . | nindent 8 }}
+        {{- include "demo-frontend.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "flask-frontend.serviceAccountName" . }}
+      serviceAccountName: {{ include "demo-frontend.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

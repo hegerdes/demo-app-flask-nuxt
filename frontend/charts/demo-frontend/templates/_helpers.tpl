@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "flask-backend.name" -}}
+{{- define "demo-frontend.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "flask-backend.fullname" -}}
+{{- define "demo-frontend.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "flask-backend.chart" -}}
+{{- define "demo-frontend.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "flask-backend.labels" -}}
-helm.sh/chart: {{ include "flask-backend.chart" . }}
-{{ include "flask-backend.selectorLabels" . }}
+{{- define "demo-frontend.labels" -}}
+helm.sh/chart: {{ include "demo-frontend.chart" . }}
+{{ include "demo-frontend.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,9 +43,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Selector labels
+*/}}
+{{- define "demo-frontend.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "demo-frontend.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Pod annotations
 */}}
-{{- define "flask-backend.pod.annotations" -}}
+{{- define "demo-frontend.pod.annotations" -}}
 {{- range $k, $v := .Values.podAnnotations }}
 {{- $k }}: {{ $v }}
 {{- end }}
@@ -56,7 +64,7 @@ checksum: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum
 {{/*
 Service annotations
 */}}
-{{- define "flask-backend.service.annotations" -}}
+{{- define "demo-frontend.service.annotations" -}}
 prometheus/scrape: {{ .Values.service.prometheus.enabled | quote }}
 {{- range $k, $v := .Values.service.annotations }}
 {{- $k }}: {{ $v }}
@@ -69,19 +77,11 @@ prometheus/port: {{ .Values.service.prometheus.port | quote}}
 {{- end }}
 
 {{/*
-Selector labels
-*/}}
-{{- define "flask-backend.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "flask-backend.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
 Create the name of the service account to use
 */}}
-{{- define "flask-backend.serviceAccountName" -}}
+{{- define "demo-frontend.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "flask-backend.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "demo-frontend.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

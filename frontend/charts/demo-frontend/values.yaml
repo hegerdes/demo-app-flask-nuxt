@@ -1,4 +1,4 @@
-# Default values for flask-backend.
+# Default values for demo-frontend.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -8,7 +8,7 @@ image:
   repository: hegerdes/demo-app-flask-nuxt
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: backend
+  tag: frontend
 
 imagePullSecrets: []
 nameOverride: ""
@@ -41,11 +41,10 @@ service:
   port: 80
   annotations: {}
   prometheus:
-    enabled: true
+    enabled: false
     scheme: http
     path: /metrics
     port: 80
-
 
 ingress:
   enabled: false

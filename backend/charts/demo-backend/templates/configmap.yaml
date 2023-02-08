@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "flask-frontend.fullname" . }}
+  name: {{ template "demo-backend.fullname" . }}
   labels:
-    app: {{ template "flask-frontend.fullname" . }}
+    app: {{ template "demo-backend.fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 data:
-  env: dev
+  elasticsearch.yml: HI
