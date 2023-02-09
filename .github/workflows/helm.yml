@@ -26,11 +26,13 @@ jobs:
           mkdir -p charts/.deploy
           helm package charts/demo-backend/ --version 0.2.0 --app-version 0.2.0 --destination charts/.deploy
           helm package charts/demo-frontend/ --version 0.2.0 --app-version 0.2.0 --destination charts/.deploy
+          ls -la
+          ls -la charts/.deploy
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         with:
-          charts_dir: charts
           skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_PACKAGE_PATH: charts/.deploy
