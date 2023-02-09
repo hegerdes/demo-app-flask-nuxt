@@ -34,8 +34,8 @@ jobs:
         with:
           push: true
           sbom: true
-          context: ${{ matrix.version }}
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo-app-flask-nuxt:${{ matrix.version }}
+          context: ${{ matrix.app }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo-app-flask-nuxt:${{ matrix.app }}
           build-args: |
             APP_VERSION=${{ env.RELEASE_VERSION }}
             COMMIT_HASH=${{ env.SHORT_SHA }}
