@@ -83,7 +83,7 @@ export default {
     }
   },
   methods: {
-    get:  () => {
+    get: function () {
       fetch(this.backend)
         .then((res) => res.json())
         .then((jsonres) => {
@@ -97,7 +97,7 @@ export default {
         .catch((err) => (this.data = err))
     },
 
-    post: () => {
+    post: function () {
       fetch(this.backend, {
         method: 'POST',
         headers: {
