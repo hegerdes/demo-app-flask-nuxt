@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: hegerdes4ares/demo-app-flask-nuxt
+  repository: hegerdes/demo-app-flask-nuxt
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: backend
