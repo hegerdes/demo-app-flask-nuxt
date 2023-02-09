@@ -1,9 +1,0 @@
-dependencies:
-- name: demo-frontend
-  repository: https://hegerdes.github.io/demo-app-flask-nuxt/
-  version: 0.2.0
-- name: demo-backend
-  repository: https://hegerdes.github.io/demo-app-flask-nuxt/
-  version: 0.2.0
-digest: sha256:c0e35e6f3db2e36ac264262d4d18c1efa3e585edb705545b6fd4c2f580e63235
-generated: "2023-02-09T15:51:48.9962833+01:00"
