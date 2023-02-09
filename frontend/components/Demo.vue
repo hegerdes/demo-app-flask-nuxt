@@ -83,21 +83,21 @@ export default {
     }
   },
   methods: {
-    get: function () {
+    get:  () => {
       fetch(this.backend)
         .then((res) => res.json())
         .then((jsonres) => {
           this.data = jsonres
-          let tabledata = jsonres.RequestInfo
-          tabledata.RequestCounter = jsonres.ServerInfo.RequestCounter
-          tabledata.Node = jsonres.ServerInfo.Node
-          this.tabledata = [tabledata]
+          let res_info = jsonres.RequestInfo
+          res_info.RequestCounter = jsonres.ServerInfo.RequestCounter
+          res_info.Node = jsonres.ServerInfo.Node
+          this.tabledata.push(res_info)
           console.log(this.tabledata)
         })
         .catch((err) => (this.data = err))
     },
 
-    post: function () {
+    post: () => {
       fetch(this.backend, {
         method: 'POST',
         headers: {
@@ -108,10 +108,10 @@ export default {
         .then((res) => res.json())
         .then((jsonres) => {
           this.data = jsonres
-          let tabledata = jsonres.RequestInfo
-          tabledata.RequestCounter = jsonres.ServerInfo.RequestCounter
-          tabledata.Node = jsonres.ServerInfo.Node
-          this.tabledata = [tabledata]
+          let res_info = jsonres.RequestInfo
+          res_info.RequestCounter = jsonres.ServerInfo.RequestCounter
+          res_info.Node = jsonres.ServerInfo.Node
+          this.tabledata.push(res_info)
           console.log(this.tabledata)
         })
         .catch((err) => (this.data = err))
