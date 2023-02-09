@@ -1,5 +1,25 @@
 apiVersion: v1
 entries:
+  demo-app:
+  - apiVersion: v2
+    appVersion: 0.2.7
+    created: "2023-02-09T17:01:38.162933557Z"
+    dependencies:
+    - condition: demo-frontend.enabled
+      name: demo-frontend
+      repository: https://hegerdes.github.io/demo-app-flask-nuxt/
+      version: ~0.2.7
+    - condition: demo-backend.enabled
+      name: demo-backend
+      repository: https://hegerdes.github.io/demo-app-flask-nuxt/
+      version: ~0.2.7
+    description: A Helm chart for Kubernetes
+    digest: 8c04cb1010c4dc76cea8767a76429a2ec1edd8f2f0839a36aaa0a57296186006
+    name: demo-app
+    type: application
+    urls:
+    - https://github.com/hegerdes/demo-app-flask-nuxt/releases/download/demo-app-0.2.7/demo-app-0.2.7.tgz
+    version: 0.2.7
   demo-backend:
   - apiVersion: v2
     appVersion: 0.2.7
@@ -22,4 +42,4 @@ entries:
     urls:
     - https://github.com/hegerdes/demo-app-flask-nuxt/releases/download/demo-frontend-0.2.7/demo-frontend-0.2.7.tgz
     version: 0.2.7
-generated: "2023-02-09T16:58:10.230403859Z"
+generated: "2023-02-09T17:01:38.162940757Z"
