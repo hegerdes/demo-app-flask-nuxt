@@ -21,9 +21,16 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v3
 
+      - name: Package Charts
+        run: |
+          mkdir -p .deploy
+          helm demo-backend/ --version 0.2.0 --app-version 0.2.0 --destination .deploy
+          helm demo-frontend/ --version 0.2.0 --app-version 0.2.0 --destination .deploy
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         with:
-          charts_dir: backend/charts
+          charts_dir: charts
+          skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
