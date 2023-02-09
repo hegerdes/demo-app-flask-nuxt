@@ -70,9 +70,9 @@ prometheus/scrape: {{ .Values.service.prometheus.enabled | quote }}
 {{- $k }}: {{ $v }}
 {{- end }}
 {{- if .Values.service.prometheus.enabled }}
-prometheus/scheme: {{ .Values.service.prometheus.scheme | quote}}
-prometheus/path: {{ .Values.service.prometheus.path | quote}}
-prometheus/port: {{ .Values.service.prometheus.port | quote}}
+prometheus.io/scheme: {{ .Values.service.prometheus.scheme | quote}}
+prometheus.io/path: {{ .Values.service.prometheus.path | quote}}
+prometheus.io/port: {{ .Values.service.prometheus.port | quote}}
 {{- end }}
 {{- end }}
 
