@@ -2,7 +2,7 @@ name: Release Charts
 
 on:
   push:
-    branches: [main, master]
+    # branches: [main, master]
     tags: ['*']
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Set tag env
         run: |
@@ -28,6 +28,7 @@ jobs:
       - name: Package Charts
         run: |
           mkdir -p charts/.deploy
+          echo "Setting version to ${RELEASE_VERSION}"
           helm package charts/demo-backend/ --version $RELEASE_VERSION --app-version $RELEASE_VERSION --destination charts/.deploy
           helm package charts/demo-frontend/ --version $RELEASE_VERSION --app-version $RELEASE_VERSION --destination charts/.deploy
 
