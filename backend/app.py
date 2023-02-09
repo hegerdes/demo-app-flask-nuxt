@@ -20,7 +20,7 @@ app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 cors = CORS(app)
 
-metrics.info('app_info', 'Application info', version='0.1.1')
+metrics.info('app_info', 'Application info', version=os.environ.get('APP_VERSION', '1.0.0'))
 get_counter = 0
 post_counter = 0
 
@@ -46,14 +46,7 @@ def home_get():
                 'Node': os.environ.get('HOSTNAME', 'DEFAULT_HOST'),
                 'RequestCounter': get_counter
             }
-            }
-
-@app.route('/metrics')
-@metrics.do_not_track()
-def metrics_get():
-    response_data, content_type = metrics.generate_metrics()
-    print(response_data)
-    return  Response(response_data, mimetype=content_type)
+        }
 
 @app.route("/", methods=["POST"])
 def home_post():
@@ -77,10 +70,18 @@ def home_post():
                 'Node': os.environ.get('HOSTNAME', 'DEFAULT_HOST'),
                 'RequestCounter': post_counter
             }
-            }
+        }
+
+@app.route('/metrics')
+@metrics.do_not_track()
+def metrics_get():
+    response_data, content_type = metrics.generate_metrics()
+    print(response_data)
+    return Response(response_data, mimetype=content_type)
 
 
-@app.route('/health')
+@app.route('/healthz')
+@metrics.do_not_track()
 def home_health():
     return 'ok'
 
@@ -96,8 +97,10 @@ def start():
     return app
 
 
+# Run
 start()
 
+# Run in dev mode
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
