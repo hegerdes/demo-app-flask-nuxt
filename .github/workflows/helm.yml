@@ -24,8 +24,8 @@ jobs:
       - name: Package Charts
         run: |
           mkdir -p .deploy
-          helm demo-backend/ --version 0.2.0 --app-version 0.2.0 --destination .deploy
-          helm demo-frontend/ --version 0.2.0 --app-version 0.2.0 --destination .deploy
+          helm package demo-backend/ --version 0.2.0 --app-version 0.2.0 --destination .deploy
+          helm package demo-frontend/ --version 0.2.0 --app-version 0.2.0 --destination .deploy
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
