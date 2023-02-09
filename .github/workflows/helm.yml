@@ -2,7 +2,7 @@ name: Release Charts
 
 on:
   push:
-    # branches: [main, master]
+    branches: [main, master]
     tags: ['*']
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v1
 
       - name: Set tag env
         run: |
@@ -40,10 +40,11 @@ jobs:
           CR_PACKAGE_PATH: charts/.deploy
 
   Release-Master-Chart:
+    needs: Release-Sub-Charts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v1
 
       - name: Set tag env
         run: |
