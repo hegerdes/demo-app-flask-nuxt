@@ -6,16 +6,16 @@ on:
     tags: ['*']
 
 jobs:
-  Release-Charts:
+  Release-Sub-Charts:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Set tag env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Configure Git
         run: |
@@ -30,8 +30,39 @@ jobs:
           mkdir -p charts/.deploy
           helm package charts/demo-backend/ --version $RELEASE_VERSION --app-version $RELEASE_VERSION --destination charts/.deploy
           helm package charts/demo-frontend/ --version $RELEASE_VERSION --app-version $RELEASE_VERSION --destination charts/.deploy
-          ls -la
-          ls -la charts/.deploy
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.5.0
+        with:
+          skip_packaging: true
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_PACKAGE_PATH: charts/.deploy
+
+  Release-Master-Chart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set tag env
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Package Charts
+        run: |
+          mkdir -p charts/.deploy && rm -rf charts/.deploy
+          helm dependency update charts/demo-app
+          helm package charts/demo-app/ --version $RELEASE_VERSION --app-version $RELEASE_VERSION --destination charts/.deploy
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
