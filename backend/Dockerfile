@@ -1,10 +1,11 @@
-ARG VARIANT="3.9-alpine"
+ARG VARIANT="3.11-alpine"
 FROM python:${VARIANT}
 
 WORKDIR /app
 COPY requirements.txt /app
 RUN apk add gcc musl-dev libffi libffi-dev \
     && python3 -m pip install -r requirements.txt \
+    && opentelemetry-bootstrap -a install \
     && apk del git gcc musl-dev libffi-dev
 
 COPY . /app
@@ -20,3 +21,4 @@ LABEL app-version=$APP_VERSION
 LABEL commit-hash=$COMMIT_HASH
 
 ENTRYPOINT [ "gunicorn", "-c", "gunicorn.py", "app:app" ]
+# ENTRYPOINT [ "opentelemetry-instrument", "gunicorn", "-c", "gunicorn.py", "app:app" ]

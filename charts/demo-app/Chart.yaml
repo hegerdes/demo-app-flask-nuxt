@@ -32,5 +32,3 @@ dependencies:
   version: ~0.2.7
   repository: https://hegerdes.github.io/demo-app-flask-nuxt/
   condition: demo-backend.enabled
-
-
