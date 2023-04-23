@@ -91,7 +91,7 @@ export default {
           let res_info = jsonres.RequestInfo
           res_info.RequestCounter = jsonres.ServerInfo.RequestCounter
           res_info.Node = jsonres.ServerInfo.Node
-          this.tabledata.push(res_info)
+          this.tabledata.unshift(res_info)
           console.log(this.tabledata)
         })
         .catch((err) => (this.data = err))
@@ -111,7 +111,7 @@ export default {
           let res_info = jsonres.RequestInfo
           res_info.RequestCounter = jsonres.ServerInfo.RequestCounter
           res_info.Node = jsonres.ServerInfo.Node
-          this.tabledata.push(res_info)
+          this.tabledata.unshift(res_info)
           console.log(this.tabledata)
         })
         .catch((err) => (this.data = err))
