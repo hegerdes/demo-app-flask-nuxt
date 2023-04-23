@@ -33,9 +33,11 @@ services:
       replicas: 2
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+        - "traefik.http.routers.backend.rule=Host(`demo.localhost`) && Path(`/api`)"
         - "traefik.http.routers.backend.entrypoints=web"
         - "traefik.http.services.backend.loadbalancer.server.port=5000"
+        - "traefik.http.middlewares.demo-stripprefix.stripprefix.prefixes=/api"
+        - "traefik.http.routers.backend.middlewares=demo-stripprefix@docker"
 
   frontend:
     image: demo-frontend
@@ -46,7 +48,7 @@ services:
       replicas: 2
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.frontend.rule=Host(`frontend.localhost`)"
+        - "traefik.http.routers.frontend.rule=Host(`demo.localhost`)"
         - "traefik.http.routers.frontend.entrypoints=web"
         - "traefik.http.services.frontend.loadbalancer.server.port=80"
 

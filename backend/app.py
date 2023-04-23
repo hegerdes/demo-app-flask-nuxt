@@ -10,6 +10,7 @@ from flask_cors import CORS
 from sqlalchemy import update
 from flask_limiter.util import get_remote_address
 from prometheus_flask_exporter.multiprocess import PrometheusMetrics
+from flask_session import Session
 
 # import lib.db as db
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -19,17 +20,33 @@ conn = None
 logging.info("Init Flask")
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
+
+# Check Configuration section for more details
+SESSION_TYPE = "filesystem"
+app.config.from_object(__name__)
+Session(app)
 cors = CORS(app)
+
+get_counter = {}
+post_counter = {}
 
 metrics.info(
     "app_info", "Application info", version=os.environ.get("APP_VERSION", "1.0.0")
 )
-get_counter = 0
-post_counter = 0
+
+
+def getIP(request: flask.Request) -> str:
+    headers_forward_list = request.headers.getlist("X-Forwarded-For")
+    return headers_forward_list[0] if headers_forward_list else request.remote_addr
 
 
 @app.route("/")
 def home_get():
+    app.logger.info(
+        "Got GET request at: {} from upstream {}".format(
+            date.today(), flask.request.remote_addr
+        )
+    )
     # res = dict(app.dbconn.execute(
     #     'SELECT type, counter FROM access;').fetchall())
     # stmt = (
@@ -39,22 +56,37 @@ def home_get():
     # )
     # logging.info('Got GET reqest at: ' + str(date.today()))
     # app.dbconn.execute(stmt)
+
+    # Request counter
+    # NOTE: This is just in memory and not replication safe
+    ip = getIP(flask.request)
+    user_agent = flask.request.headers.get("User-Agent")
+    counter = flask.session.get("GET_" + ip, 0) + 1
+    get_counter["GET_" + ip] = counter
+    flask.session["GET_" + ip] = counter
+
     return {
         "RequestInfo": {
             "host": flask.request.headers.get("Host"),
-            "user-agent": flask.request.headers.get("User-Agent"),
+            "user-agent": user_agent,
+            "ip": ip,
             "method": "GET",
         },
         "ServerInfo": {
             "Node": os.environ.get("HOSTNAME", "DEFAULT_HOST"),
-            "RequestCounter": get_counter,
+            "RequestCounter": counter,
         },
     }
 
 
 @app.route("/", methods=["POST"])
 def home_post():
-    logging.info("Got POST reqest at: " + str(date.today()))
+    app.logger.info(
+        "Got POST request at: {} from upstream {}".format(
+            date.today(), flask.request.remote_addr
+        )
+    )
+
     # res = dict(app.dbconn.execute(
     #     'SELECT type, counter FROM access;').fetchall())
     # stmt = (
@@ -63,16 +95,26 @@ def home_post():
     #     values(counter=res['POST'] + 1)
     # )
     # app.dbconn.execute(stmt)
+
+    # Request counter
+    # NOTE: This is just in memory and not replication safe
+    ip = getIP(flask.request)
+    user_agent = flask.request.headers.get("User-Agent")
+    counter = flask.session.get("POST_" + ip, 0) + 1
+    post_counter["POST_" + ip] = counter
+    flask.session["POST_" + ip] = counter
+
     return {
         "RequestInfo": {
             "host": flask.request.headers.get("Host"),
-            "user-agent": flask.request.headers.get("User-Agent"),
+            "user-agent": user_agent,
+            "ip": ip,
             "method": "POST",
             "payload": str(flask.request.get_json()),
         },
         "ServerInfo": {
             "Node": os.environ.get("HOSTNAME", "DEFAULT_HOST"),
-            "RequestCounter": post_counter,
+            "RequestCounter": counter,
         },
     }
 
@@ -104,6 +146,11 @@ def start():
 
 # Run
 start()
+
+if __name__ != "__main__":
+    wasgi_logger = logging.getLogger("gunicorn.error")
+    app.logger.handlers = wasgi_logger.handlers
+    app.logger.setLevel(wasgi_logger.level)
 
 # Run in dev mode
 if __name__ == "__main__":

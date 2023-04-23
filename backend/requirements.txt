@@ -4,6 +4,7 @@ cryptography
 Flask
 Flask-Cors
 Flask-SQLAlchemy
+Flask-Session
 greenlet
 gunicorn
 idna

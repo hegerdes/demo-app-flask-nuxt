@@ -41,6 +41,7 @@ jobs:
           sbom: true
           context: ${{ matrix.app }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo-app-flask-nuxt:${{ matrix.app }}
+          # platforms: linux/amd64,linux/arm64
           build-args: |
             APP_VERSION=${{ env.RELEASE_VERSION }}
             COMMIT_HASH=${{ env.SHORT_SHA }}

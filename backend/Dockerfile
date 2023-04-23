@@ -3,10 +3,14 @@ FROM python:${VARIANT}
 
 WORKDIR /app
 COPY requirements.txt /app
-RUN apk add gcc musl-dev libffi libffi-dev \
-    && python3 -m pip install -r requirements.txt \
+ENV GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+ENV GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+
+RUN apk add curl gcc g++ musl-dev libffi libffi-dev \
+    && python3 -m pip --no-cache-dir install wheel \
+    && python3 -m pip --no-cache-dir install -r requirements.txt \
     && opentelemetry-bootstrap -a install \
-    && apk del git gcc musl-dev libffi-dev
+    && apk del git gcc g++ musl-dev libffi-dev
 
 COPY . /app
 ARG APP_PORT=5000
@@ -19,6 +23,9 @@ ENV COMMIT_HASH=$COMMIT_HASH
 
 LABEL app-version=$APP_VERSION
 LABEL commit-hash=$COMMIT_HASH
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:$PORT/ || exit 1
 
 ENTRYPOINT [ "gunicorn", "-c", "gunicorn.py", "app:app" ]
 # ENTRYPOINT [ "opentelemetry-instrument", "gunicorn", "-c", "gunicorn.py", "app:app" ]
