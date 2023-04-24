@@ -39,11 +39,13 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          sbom: true
           push: ${{ github.ref_name == 'main' }}
-          context: ${{ matrix.app }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo-app-flask-nuxt:${{ matrix.app }}
           platforms: linux/amd64,linux/arm64
+          context: ${{ matrix.app }}
+          sbom: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             APP_VERSION=${{ env.RELEASE_VERSION }}
             COMMIT_HASH=${{ env.SHORT_SHA }}

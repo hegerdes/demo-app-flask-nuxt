@@ -3,12 +3,11 @@ FROM python:${VARIANT}
 
 WORKDIR /app
 COPY requirements.txt /app
-ENV GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
-ENV GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
-RUN apk add curl gcc g++ musl-dev libffi libffi-dev openssl-dev \
+RUN apk add --no-cache git curl gcc g++ musl-dev libffi libffi-dev openssl-dev \
     && python3 -m pip --no-cache-dir install --upgrade wheel \
     && python3 -m pip --no-cache-dir install --upgrade setuptools \
+    && python3 -m pip --no-cache-dir install --upgrade pip \
     && python3 -m pip --no-cache-dir install -r requirements.txt \
     && opentelemetry-bootstrap -a install \
     && apk del git gcc g++ musl-dev libffi-dev openssl-dev
