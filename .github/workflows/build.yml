@@ -2,8 +2,10 @@ name: Build Container Images
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths: ['frontend/**', 'backend/**']
+  pull_request:
+    branches: [main]
 
 jobs:
   build-image:
@@ -33,15 +35,18 @@ jobs:
         run: |
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          if [ "${{ matrix.app }}" = "backend" ]; then echo "CACHE_TO=type=gha,mode=max" >> $GITHUB_ENV; fi
 
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          push: true
-          sbom: true
-          context: ${{ matrix.app }}
+          push: ${{ github.ref_name == 'main' }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo-app-flask-nuxt:${{ matrix.app }}
-          # platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64
+          context: ${{ matrix.app }}
+          sbom: true
+          cache-from: type=gha
+          cache-to: ${{ env.CACHE_TO }}
           build-args: |
             APP_VERSION=${{ env.RELEASE_VERSION }}
             COMMIT_HASH=${{ env.SHORT_SHA }}
