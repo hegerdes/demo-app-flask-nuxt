@@ -5,3 +5,5 @@ __pychache__
 *.log
 cache
 env
+.git
+.nuxt
