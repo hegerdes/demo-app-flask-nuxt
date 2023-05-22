@@ -4,13 +4,14 @@ FROM python:${VARIANT}
 WORKDIR /app
 COPY requirements.txt /app
 
-RUN apk add --no-cache git curl gcc g++ musl-dev libffi libffi-dev openssl-dev \
+RUN apk add --no-cache curl libffi \
+    && apk add --no-cache --virtual mybuildpack git gcc g++ musl-dev libffi-dev openssl-dev \
+    && python3 -m pip --no-cache-dir install --upgrade pip \
     && python3 -m pip --no-cache-dir install --upgrade wheel \
     && python3 -m pip --no-cache-dir install --upgrade setuptools \
-    && python3 -m pip --no-cache-dir install --upgrade pip \
     && python3 -m pip --no-cache-dir install -r requirements.txt \
     && opentelemetry-bootstrap -a install \
-    && apk del git gcc g++ musl-dev libffi-dev openssl-dev
+    && apk del mybuildpack
 
 COPY . /app
 ARG APP_PORT=5000

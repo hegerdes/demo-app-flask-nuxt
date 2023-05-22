@@ -12,7 +12,7 @@ COPY . /app
 RUN cp .env.$BUILD_ENV .env && npm run generate && cat .env
 
 # DEPLOY-Container
-FROM httpd:2.4-bullseye
+FROM httpd:2.4-alpine
 ARG COMMIT_HASH="none"
 ARG COMMIT_TAG="none"
 ENV COMMIT_HASH=$COMMIT_HASH
