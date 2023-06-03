@@ -25,7 +25,7 @@ jobs:
       build-args: COMMIT_HASH=${{ github.sha }},APP_VERSION=${{ github.ref_name }}
       build-labels: MAINTAINER=${{ github.actor }},REPO=${{ github.repository }}
       build-platforms: linux/amd64,linux/arm64
-      extra-command: echo 'Checkout my website henrikgerdes.me'
+      extra-commands: echo 'Checkout my website henrikgerdes.me'
       push: ${{ github.ref_name == 'main' }}
     secrets:
       REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
