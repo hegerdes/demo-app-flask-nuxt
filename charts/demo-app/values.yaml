@@ -7,6 +7,6 @@ fullnameOverride: ""
 
 # Dependency values
 demo-frontend:
-  enabeld: true
+  enabled: true
 demo-backend:
-  enabeld: true
+  enabled: true
