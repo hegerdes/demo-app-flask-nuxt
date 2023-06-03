@@ -2,3 +2,4 @@
 charts/demo-app/charts/*.tgz
 demo-app-*.tgz
 backend/flask_session
+charts/**/*.tgz
