@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: check-yaml
         exclude: charts
+        args: [--allow-multiple-documents]
       - id: check-json
         exclude: frontend/.devcontainer
       - id: check-added-large-files
