@@ -6,11 +6,14 @@ repos:
         exclude: charts
         args: [--allow-multiple-documents]
       - id: check-json
-        exclude: frontend/.devcontainer
+        exclude: .*devcontainer.json
       - id: check-added-large-files
       - id: check-shebang-scripts-are-executable
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: requirements-txt-fixer
+      - id: check-ast
+      - id: detect-private-key
   - repo: https://github.com/psf/black
     rev: 23.1.0
     hooks:

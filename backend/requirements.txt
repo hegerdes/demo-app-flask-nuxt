@@ -3,14 +3,18 @@ click
 cryptography
 Flask
 Flask-Cors
-Flask-SQLAlchemy
+Flask-Limiter
 Flask-Session
+Flask-SQLAlchemy
 greenlet
 gunicorn
 idna
 Jinja2
 limits
 MarkupSafe
+opentelemetry-distro
+opentelemetry-exporter-otlp
+prometheus-flask-exporter
 PyMySQL
 python-dotenv
 requests
@@ -18,7 +22,3 @@ six
 SQLAlchemy
 urllib3
 Werkzeug
-Flask-Limiter
-prometheus-flask-exporter
-opentelemetry-distro
-opentelemetry-exporter-otlp
