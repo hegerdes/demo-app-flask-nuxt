@@ -10,49 +10,49 @@ permissions:
   id-token: write
 
 jobs:
-  Build-Sub-Charts:
-    strategy:
-      matrix:
-        app: [demo-backend, demo-frontend]
-    uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
-    with:
-      chart-sources-dir: charts/${{ matrix.app }}
-      chart-publish: ${{ github.event_name != 'pull_request' }}
-      chart-release-version: 0.3.0
-      extra-commands: cp -v charts/*.yaml charts/${{ matrix.app }}
-      publish-to-gh-pages: ${{ startsWith(github.ref, 'refs/tags/') }}
-      chart-devel-version: ${{ !startsWith(github.ref, 'refs/tags/') }}
-      oci-registry-uri: registry-1.docker.io
-      oci-registry-repo: ${{ github.repository_owner }}
-    secrets:
-      OCI_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-      OCI_REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  # Build-Sub-Charts:
+  #   strategy:
+  #     matrix:
+  #       app: [demo-backend, demo-frontend]
+  #   uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
+  #   with:
+  #     chart-sources-dir: charts/${{ matrix.app }}
+  #     chart-publish: ${{ github.event_name != 'pull_request' }}
+  #     chart-release-version: 0.3.0
+  #     extra-commands: cp -v charts/*.yaml charts/${{ matrix.app }}
+  #     publish-to-gh-pages: ${{ startsWith(github.ref, 'refs/tags/') }}
+  #     chart-devel-version: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  #     oci-registry-uri: registry-1.docker.io
+  #     oci-registry-repo: ${{ github.repository_owner }}
+  #   secrets:
+  #     OCI_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  #     OCI_REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  #     # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  #     # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-  Build-Mater-Charts:
-    uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
-    needs: Build-Sub-Charts
-    with:
-      chart-sources-dir: charts/demo-app
-      chart-publish: ${{ github.event_name != 'pull_request' }}
-      extra-commands: cp -v charts/*.yaml charts/demo-app
-      chart-release-version: 0.3.0
-      publish-to-gh-pages: ${{ startsWith(github.ref, 'refs/tags/') }}
-      chart-devel-version: ${{ !startsWith(github.ref, 'refs/tags/') }}
-      oci-registry-uri: registry-1.docker.io
-      oci-registry-repo: ${{ github.repository_owner }}
-    secrets:
-      OCI_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-      OCI_REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  # Build-Mater-Charts:
+  #   uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
+  #   needs: Build-Sub-Charts
+  #   with:
+  #     chart-sources-dir: charts/demo-app
+  #     chart-publish: ${{ github.event_name != 'pull_request' }}
+  #     extra-commands: cp -v charts/*.yaml charts/demo-app
+  #     chart-release-version: 0.3.0
+  #     publish-to-gh-pages: ${{ startsWith(github.ref, 'refs/tags/') }}
+  #     chart-devel-version: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  #     oci-registry-uri: registry-1.docker.io
+  #     oci-registry-repo: ${{ github.repository_owner }}
+  #   secrets:
+  #     OCI_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  #     OCI_REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  #     # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  #     # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   Chart-Test:
     runs-on: ubuntu-latest
-    needs: Build-Mater-Charts
+    # needs: Build-Mater-Charts
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -85,7 +85,6 @@ jobs:
         uses: helm/kind-action@v1.4.0
 
       - name: Run chart-testing (install)
-        working-directory: charts/demo-backend
         run: ct install --target-branch ${{ github.event.repository.default_branch }} --charts charts/demo-backend
         continue-on-error: true
         env:
