@@ -71,14 +71,13 @@ jobs:
 
       - name: Update helm dependencies
         run: |
-          cp -v charts/*.yaml charts/demo-backend
+          cp -v charts/*.yaml .
           helm dependency update charts/demo-backend
           helm package charts/demo-backend
 
       - name: Run chart-testing (lint)
-        working-directory: charts/demo-backend
         continue-on-error: true
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }}
+        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --charts charts/demo-backend
         env:
           CT_BUILD_ID: ${{ github.ref_name }}
 
@@ -87,7 +86,7 @@ jobs:
 
       - name: Run chart-testing (install)
         working-directory: charts/demo-backend
-        run: ct install --target-branch ${{ github.event.repository.default_branch }}
+        run: ct install --target-branch ${{ github.event.repository.default_branch }} --charts charts/demo-backend
         continue-on-error: true
         env:
           CT_BUILD_ID: ${{ github.ref_name }}
