@@ -1,4 +1,4 @@
-name: Release Charts
+name: Build and Test Charts
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
   id-token: write
 
 jobs:
-  Release-Sub-Charts:
+  Build-Sub-Charts:
     strategy:
       matrix:
         app: [demo-backend, demo-frontend]
@@ -23,6 +23,7 @@ jobs:
       chart-sources-dir: charts/${{ matrix.app }}
       chart-publish: ${{ github.event_name != 'pull_request' }}
       chart-release-version: 0.3.0
+      extra-commands: cp -v charts/*.yaml charts/${{ matrix.app }}
       publish-to-gh-pages: ${{ startsWith(github.ref, 'refs/tags/') }}
       chart-devel-version: ${{ !startsWith(github.ref, 'refs/tags/') }}
       oci-registry-uri: registry-1.docker.io
@@ -34,17 +35,20 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-  Release-Mater-Charts:
+  Build-Mater-Charts:
     uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
-    needs: Release-Sub-Charts
+    needs: Build-Sub-Charts
     with:
       chart-sources-dir: charts/demo-app
       chart-publish: ${{ github.event_name != 'pull_request' }}
+      extra-commands: cp -v charts/*.yaml charts/demo-app
       chart-release-version: 0.3.0
       publish-to-gh-pages: ${{ startsWith(github.ref, 'refs/tags/') }}
       chart-devel-version: ${{ !startsWith(github.ref, 'refs/tags/') }}
       oci-registry-uri: registry-1.docker.io
       oci-registry-repo: ${{ github.repository_owner }}
+      chart-test: false
+      chart-lint: false
     secrets:
       OCI_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
       OCI_REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -14,4 +14,4 @@ def child_exit(server, worker):
 
 bind = "0.0.0.0:" + environ.get("PORT", "5000")
 max_requests = 1000
-workers = cpu_count()
+workers = int(environ.get("WORKERS", cpu_count()))

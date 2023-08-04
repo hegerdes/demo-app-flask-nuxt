@@ -3,3 +3,5 @@ charts/demo-app/charts/*.tgz
 demo-app-*.tgz
 backend/flask_session
 charts/**/*.tgz
+charts/demo-app/Chart.lock
+.vscode/settings.json
