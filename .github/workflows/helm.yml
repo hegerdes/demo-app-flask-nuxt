@@ -31,9 +31,9 @@ jobs:
     secrets:
       OCI_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
       OCI_REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   Build-Mater-Charts:
     uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
@@ -52,6 +52,6 @@ jobs:
     secrets:
       OCI_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
       OCI_REGISTRY_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
