@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         app: [demo-backend, demo-frontend]
-    uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@test
+    uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
     with:
       chart-sources-dir: charts/${{ matrix.app }}
       chart-publish: ${{ github.event_name != 'pull_request' }}
@@ -32,7 +32,7 @@ jobs:
       # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   Build-Mater-Charts:
-    uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@test
+    uses: hegerdes/publish/.github/workflows/reusable-helm-package.yml@main
     needs: Build-Sub-Charts
     with:
       chart-sources-dir: charts/demo-app
@@ -49,43 +49,3 @@ jobs:
       # AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       # AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       # AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-  Chart-Test:
-    runs-on: ubuntu-latest
-    # needs: Build-Mater-Charts
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.4.0
-
-      - name: Update helm dependencies
-        run: |
-          cp -v charts/*.yaml .
-          helm dependency update charts/demo-backend
-          helm package charts/demo-backend
-
-      - name: Run chart-testing (lint)
-        continue-on-error: true
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --charts charts/demo-backend
-        env:
-          CT_BUILD_ID: ${{ github.ref_name }}
-
-      - name: Create kind cluster
-        uses: helm/kind-action@v1.8.0
-
-      - name: Run chart-testing (install)
-        run: ct install --target-branch ${{ github.event.repository.default_branch }} --charts charts/demo-backend
-        continue-on-error: true
-        env:
-          CT_BUILD_ID: ${{ github.ref_name }}

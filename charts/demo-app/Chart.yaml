@@ -23,6 +23,12 @@ version: 0.3.0
 # It is recommended to use it with quotes.
 appVersion: 0.3.0
 
+# Maintainer
+maintainers:
+  - name: hegerdes
+    email: hegerdes@outlook.de
+    url: https://henrikgerdes.me
+
 dependencies:
 - name: demo-frontend
   version: ~0.3.0
