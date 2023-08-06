@@ -20,7 +20,8 @@ jobs:
     uses: hegerdes/publish/.github/workflows/reusable-docker-build.yml@main
     with:
       build-context: ${{ matrix.app }}
-      build-tags: ${{ github.actor }}/demo-app-flask-nuxt:${{ matrix.app }}
+      build-name: ${{ github.actor }}/demo-app-flask-nuxt
+      build-tags: ${{ matrix.app }}
       build-cache: type=gha
       build-args: COMMIT_HASH=${{ github.sha }},APP_VERSION=${{ github.ref_name }}
       build-labels: MAINTAINER=${{ github.actor }},REPO=${{ github.repository }}
