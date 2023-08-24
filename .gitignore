@@ -5,3 +5,4 @@ backend/flask_session
 charts/**/*.tgz
 charts/demo-app/Chart.lock
 .vscode/settings.json
+frontend-v2/

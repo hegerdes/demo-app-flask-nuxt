@@ -4,10 +4,12 @@ import dotenv
 import logging
 import os
 import sys
+import requests
 from flask import Flask, Response
 from datetime import date
 from flask_cors import CORS
 from sqlalchemy import update
+from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from prometheus_flask_exporter.multiprocess import PrometheusMetrics
 from flask_session import Session
@@ -24,9 +26,11 @@ metrics = PrometheusMetrics(app)
 # Check Configuration section for more details
 SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)
-Session(app)
-cors = CORS(app)
-
+session = Session(app)
+coors = CORS(app)
+limiter = Limiter(
+    get_remote_address, app=app, default_limits=["60 per minute", "5 per second"]
+)
 get_counter = {}
 post_counter = {}
 
@@ -43,19 +47,10 @@ def getIP(request: flask.Request) -> str:
 @app.route("/")
 def home_get():
     app.logger.info(
-        "Got GET request at: {} from upstream {}".format(
+        "Got GET / request at: {} from upstream {}".format(
             date.today(), flask.request.remote_addr
         )
     )
-    # res = dict(app.dbconn.execute(
-    #     'SELECT type, counter FROM access;').fetchall())
-    # stmt = (
-    #     update(db.accessTable).
-    #     where(db.accessTable.c.type == 'GET').
-    #     values(counter=res['GET'] + 1)
-    # )
-    # logging.info('Got GET reqest at: ' + str(date.today()))
-    # app.dbconn.execute(stmt)
 
     # Request counter
     # NOTE: This is just in memory and not replication safe
@@ -71,6 +66,7 @@ def home_get():
             "user-agent": user_agent,
             "ip": ip,
             "method": "GET",
+            "payload": "NONE",
         },
         "ServerInfo": {
             "Node": os.environ.get("HOSTNAME", "DEFAULT_HOST"),
@@ -82,19 +78,10 @@ def home_get():
 @app.route("/", methods=["POST"])
 def home_post():
     app.logger.info(
-        "Got POST request at: {} from upstream {}".format(
+        "Got POST / request at: {} from upstream {}".format(
             date.today(), flask.request.remote_addr
         )
     )
-
-    # res = dict(app.dbconn.execute(
-    #     'SELECT type, counter FROM access;').fetchall())
-    # stmt = (
-    #     update(db.accessTable).
-    #     where(db.accessTable.c.type == 'POST').
-    #     values(counter=res['POST'] + 1)
-    # )
-    # app.dbconn.execute(stmt)
 
     # Request counter
     # NOTE: This is just in memory and not replication safe
@@ -119,7 +106,35 @@ def home_post():
     }
 
 
+@app.route("/oidc", methods=["POST"])
+def oidc():
+    app.logger.info(
+        "Got POST /oidc request at: {} from upstream {}".format(
+            date.today(), flask.request.remote_addr
+        )
+    )
+
+    payload = flask.request.get_json()
+    oidc_access_token = flask.request.headers.get("x-auth-request-access-token", None)
+    res = None
+    try:
+        if oidc_access_token:
+            url = payload.get("url")
+            method = payload.get("method", "GET")
+            data = payload.get("data", None)
+            headers = payload.get("data", {})
+            headers = {**headers, "Authorization": oidc_access_token}
+
+            response = requests.request(method, url, headers=headers, data=data)
+            res = response.json()
+    except Exception as e:
+        res = {"status": "error", "msg": str(e)}
+    finally:
+        return res
+
+
 @app.route("/metrics")
+@limiter.exempt
 @metrics.do_not_track()
 def metrics_get():
     response_data, content_type = metrics.generate_metrics()
@@ -128,6 +143,7 @@ def metrics_get():
 
 
 @app.route("/healthz")
+@limiter.exempt
 @metrics.do_not_track()
 def home_health():
     return "ok"

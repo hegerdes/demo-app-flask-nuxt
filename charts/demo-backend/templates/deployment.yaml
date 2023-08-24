@@ -34,6 +34,8 @@ spec:
           env:
             - name: PORT
               value: "80"
+            - name: FLASK_ENV
+              value: production
           ports:
             - name: http
               containerPort: 80
