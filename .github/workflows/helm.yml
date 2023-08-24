@@ -22,7 +22,7 @@ jobs:
     with:
       chart-sources-dir: charts/${{ matrix.app }}
       chart-publish: ${{ github.event_name != 'pull_request' }}
-      chart-release-version: ${{ github.ref_name }}
+      chart-release-version: ${{ (contains(github.ref, 'tag') && github.ref_name) || '0.3.0' }}
       extra-commands: cp -v charts/*.yaml charts/${{ matrix.app }}
       publish-to-gh-pages: ${{ startsWith(github.ref, 'refs/tags/') }}
       chart-devel-version: ${{ !startsWith(github.ref, 'refs/tags/') }}
