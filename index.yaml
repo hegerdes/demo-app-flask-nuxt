@@ -17,6 +17,20 @@ entries:
     version: 0.3.2
   demo-frontend:
   - apiVersion: v2
+    appVersion: 0.3.3
+    created: "2023-08-24T20:52:38.703283511Z"
+    description: A Helm chart for Kubernetes
+    digest: 89aee4a6070cebdded45ff9764b092738948be460e18ff4c76c98b048723fcbd
+    maintainers:
+    - email: hegerdes@outlook.de
+      name: hegerdes
+      url: https://henrikgerdes.me
+    name: demo-frontend
+    type: application
+    urls:
+    - https://github.com/hegerdes/demo-app-flask-nuxt/releases/download/demo-frontend-0.3.3/demo-frontend-0.3.3.tgz
+    version: 0.3.3
+  - apiVersion: v2
     appVersion: 0.3.2
     created: "2023-08-18T13:14:30.863481316Z"
     description: A Helm chart for Kubernetes
@@ -30,4 +44,4 @@ entries:
     urls:
     - https://github.com/hegerdes/demo-app-flask-nuxt/releases/download/demo-frontend-0.3.2/demo-frontend-0.3.2.tgz
     version: 0.3.2
-generated: "2023-08-18T13:14:30.863497717Z"
+generated: "2023-08-24T20:52:38.703295912Z"
