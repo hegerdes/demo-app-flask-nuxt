@@ -116,13 +116,14 @@ def oidc():
 
     payload = flask.request.get_json()
     oidc_access_token = flask.request.headers.get("x-auth-request-access-token", None)
-    res = None
+    res = {"status": "error", "msg": "no oidc access token found in headers"}
+    print(payload)
     try:
-        if oidc_access_token:
+        if oidc_access_token != None:
             url = payload.get("url")
-            method = payload.get("method", "GET")
+            method = payload.get("method", "GET").upper()
             data = payload.get("data", None)
-            headers = payload.get("data", {})
+            headers = payload.get("headers", {})
             headers = {**headers, "Authorization": oidc_access_token}
 
             response = requests.request(method, url, headers=headers, data=data)
