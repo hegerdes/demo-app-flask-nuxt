@@ -21,6 +21,7 @@ jobs:
     with:
       build-context: ${{ matrix.app }}
       build-name: ${{ github.actor }}/demo-app-flask-nuxt
+      build-dockerfile: ${{ matrix.app }}/Dockerfile
       build-tags: ${{ matrix.app }}
       build-cache: type=gha
       build-args: COMMIT_HASH=${{ github.sha }},APP_VERSION=${{ github.ref_name }}
