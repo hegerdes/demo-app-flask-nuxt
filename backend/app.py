@@ -145,7 +145,6 @@ def oidc():
     finally:
         return res
 
-
 @app.route("/metrics")
 @limiter.exempt
 @metrics.do_not_track()

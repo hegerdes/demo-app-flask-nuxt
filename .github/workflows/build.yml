@@ -15,6 +15,7 @@ permissions:
 jobs:
   docker-build:
     strategy:
+      fail-fast: false
       matrix:
         app: [backend, frontend]
     uses: hegerdes/publish/.github/workflows/reusable-docker-build.yml@main
