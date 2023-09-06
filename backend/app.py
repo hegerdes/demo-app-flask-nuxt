@@ -4,6 +4,7 @@ import dotenv
 import logging
 import os
 import sys
+import json
 import requests
 from flask import Flask, Response
 from datetime import date
@@ -115,9 +116,14 @@ def oidc():
     )
 
     payload = flask.request.get_json()
+    if isinstance(payload, str):
+        payload = json.loads(payload)
+
     oidc_access_token = flask.request.headers.get("x-auth-request-access-token", None)
     res = {"status": "error", "msg": "no oidc access token found in headers"}
-    print(payload)
+    app.logger.debug("OIDC Token: {}".format(oidc_access_token))
+    app.logger.debug(json.dumps(payload))
+
     try:
         if oidc_access_token != None:
             url = payload.get("url")
@@ -125,10 +131,16 @@ def oidc():
             data = payload.get("data", None)
             headers = payload.get("headers", {})
             headers = {**headers, "Authorization": oidc_access_token}
+            app.logger.info(
+                "Sending {} with {} to {} with headers:{}".format(method, data, url, json.dumps(headers))
+            )
 
             response = requests.request(method, url, headers=headers, data=data)
             res = response.json()
+            app.logger.debug("ODIC RES: {}".format(json.dumps(res)))
     except Exception as e:
+        app.logger.error(str(e))
+        app.logger.error(str(e.with_traceback()))
         res = {"status": "error", "msg": str(e)}
     finally:
         return res
