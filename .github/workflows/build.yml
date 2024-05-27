@@ -3,7 +3,7 @@ name: Build Container Images
 on:
   push:
     branches: [main]
-    paths: ['frontend/**', 'backend/**']
+    paths: ["frontend/**", "backend/**"]
   pull_request:
     branches: [main]
 
@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         app: [backend, frontend]
-    uses: hegerdes/publish/.github/workflows/reusable-docker-build.yml@main
+    uses: hegerdes/helper-suite/.github/workflows/reusable-docker-build.yml@main
     with:
       build-context: ${{ matrix.app }}
       build-name: ${{ github.actor }}/demo-app-flask-nuxt
