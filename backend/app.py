@@ -132,7 +132,9 @@ def oidc():
             headers = payload.get("headers", {})
             headers = {**headers, "Authorization": oidc_access_token}
             app.logger.info(
-                "Sending {} with {} to {} with headers:{}".format(method, data, url, json.dumps(headers))
+                "Sending {} with {} to {} with headers:{}".format(
+                    method, data, url, json.dumps(headers)
+                )
             )
 
             response = requests.request(method, url, headers=headers, data=data)
@@ -144,6 +146,7 @@ def oidc():
         res = {"status": "error", "msg": str(e)}
     finally:
         return res
+
 
 @app.route("/metrics")
 @limiter.exempt
