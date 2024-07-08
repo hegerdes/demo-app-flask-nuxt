@@ -1,0 +1,88 @@
+stages:
+  - schedule
+  - test
+  - build
+  - sec-scan
+  - pages
+  - distribute
+  - deploy
+
+variables:
+  GL_K8S_CONTEXT: gitops
+  GL_K8S_AGENT_ID: 1103496
+
+include:
+  - project: hegerdes/gitlab-actions
+    file: .gitlab/ci/snippets.yml
+  - project: hegerdes/gitlab-actions
+    file: .gitlab/ci/rules.yml
+  - project: hegerdes/gitlab-actions
+    file: .gitlab/ci/kubectl-review.yml
+  - component: gitlab.com/hegerdes/gitlab-actions/kaniko-build@main
+    inputs:
+      as_job: kaniko-build-backend
+      image_tags: ["$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG"]
+      context: backend
+      dockerfile: backend/Dockerfile
+  - component: gitlab.com/hegerdes/gitlab-actions/kaniko-build@main
+    inputs:
+      as_job: kaniko-build-frontend
+      image_tags: ["$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_REF_SLUG"]
+      context: frontend
+      dockerfile: frontend/Dockerfile
+
+KUBE:create-review-app-frontend:
+  extends: .KUBE:create-review-app-tmp
+  variables:
+    APP: frontend
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}-frontend
+    on_stop: KUBE:delete-review-app-frontend
+
+KUBE:create-review-app-backend:
+  extends: .KUBE:create-review-app-tmp
+  variables:
+    APP: backend
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}-backend
+    on_stop: KUBE:delete-review-app-backend
+
+KUBE:delete-review-app-backend:
+  extends: .KUBE:delete-review-app-tmp
+  variables:
+    APP: backend
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}-backend
+
+KUBE:delete-review-app-frontend:
+  extends: .KUBE:delete-review-app-tmp
+  variables:
+    APP: frontend
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}-frontend
+
+.KUBE:create-review-app-tmp:
+  extends: .KUBE:create-review-app
+  script:
+    - |
+      # Adopting argo app
+      yq eval ".spec.source.helm.valuesObject.image.repository = \"${CI_REGISTRY_IMAGE}/${APP}\"" -i charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+      yq eval ".spec.source.helm.valuesObject.image.tag = \"${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+      yq eval ".spec.source.helm.valuesObject.ingress.hosts[0].host = \"${CI_COMMIT_REF_SLUG}.123-preview.com\"" -i charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+      yq eval ".spec.destination.namespace = \"${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+      yq eval ".metadata.name = \"demo-app-${APP}-${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+    - cat charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+    - kubectl apply -f charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}-${APP}
+    on_stop: KUBE:delete-review-app-${APP}
+
+.KUBE:delete-review-app-tmp:
+  extends: .KUBE:delete-review-app
+  script:
+    - |
+      # Adopting argo app
+      yq eval ".metadata.name = \"demo-app-${APP}-${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+    - kubectl delete -f charts/deploy/argo-demo-app-flask-nuxt-${APP}.yml
+  environment:
+    on_stop: null
