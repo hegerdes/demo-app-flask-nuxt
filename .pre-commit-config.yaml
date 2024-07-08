@@ -1,10 +1,10 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-yaml
         exclude: charts
-        args: [--allow-multiple-documents]
+        args: [--allow-multiple-documents, --unsafe]
       - id: check-json
         exclude: .*devcontainer.json
       - id: check-added-large-files
@@ -14,7 +14,8 @@ repos:
       - id: requirements-txt-fixer
       - id: check-ast
       - id: detect-private-key
+
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 24.4.2
     hooks:
       - id: black

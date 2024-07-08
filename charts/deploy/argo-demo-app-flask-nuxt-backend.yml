@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app-flask-nuxt-backend
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: demo-backend
+    repoURL: https://hegerdes.github.io/demo-app-flask-nuxt/
+    targetRevision: 0.*
+    helm:
+      releaseName: demo-app-fn-backend
+      valuesObject:
+        replicaCount: 1
+        image:
+          repository: hegerdes/demo-app-flask-nuxt
+          tag: backend
+          pullPolicy: Always
+        ingress:
+          enabled: yes
+          className: nginx
+          annotations:
+          # cert-manager.io/cluster-issuer: letsencrypt-prod-nginx
+          hosts:
+            - host: demo-app-fn.local
+              paths:
+                - path: /api(/|$)(.*)
+                  pathType: Prefix
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: demo
+  info:
+    - name: "Chart Info"
+      value: "https://github.com/hegerdes/demo-app-flask-nuxt/tree/main/charts"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
